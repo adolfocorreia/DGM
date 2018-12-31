@@ -79,7 +79,7 @@ maximizer_optimizer = tf.train.AdamOptimizer(learning_rate=0.001).\
 print("Optimizer set")
 # Training parameters
 steps_per_sample = 10
-sampling_stages = 50
+sampling_stages = 500
 
 samples_1 = 100
 samples_3 = 100
