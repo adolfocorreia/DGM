@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 import DGMnets
 
 
+
+# Set random seeds
+np.random.seed(42)
+tf.set_random_seed(42)
+
+
 # Loss for heat equation
 gamma = 1.0
 mu = 0.2
@@ -52,9 +58,9 @@ def sampler(N1,N3,tfinal,xlow,xhigh):
     return t1,x1,t3,x3
 
 with tf.variable_scope("solver",reuse=True):
-    solver = DGMnets.DGMNet(50,3,dim=1)
+    solver = DGMnets.DGMNet(3,50)
 with tf.variable_scope("maximizer",reuse=True):
-    maximizer = DGMnets.DGMNet(50,3,dim=1)
+    maximizer = DGMnets.DGMNet(3,50)
 
 print("Net created")
 # Loss tensors

@@ -9,6 +9,11 @@ import hessian
 
 
 
+# Set random seeds
+np.random.seed(42)
+tf.set_random_seed(42)
+
+
 # PDE parameters
 r = 0.05            # Interest rate
 sigma = 0.25        # Volatility
@@ -101,7 +106,7 @@ def sampler(N1, N2, N3):
 # Neural Network definition
 num_layers = 3
 nodes_per_layer = 50
-model = DGMnets.DGMNet(nodes_per_layer, num_layers, dim=1)
+model = DGMnets.DGMNet(num_layers, nodes_per_layer)
 
 t1_t = tf.placeholder(tf.float32, [None,1])
 x1_t = tf.placeholder(tf.float32, [None,1])
@@ -126,7 +131,7 @@ optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss_t)
 
 # Training parameters
 steps_per_sample = 10
-sampling_stages = 500
+sampling_stages = 400
 
 # Number of samples
 NS_1 = 1000
