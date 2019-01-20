@@ -6,5 +6,7 @@ Deep Galerkin Method
 conda create --name tensorflow python=3.6
 conda activate tensorflow
 conda install tensorflow-gpu
-conda install ipython pylint
+conda install notebook pylint
+conda install matplotlib
+conda env export > environment.yml
 ```
