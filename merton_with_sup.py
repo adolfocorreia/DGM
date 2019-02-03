@@ -34,6 +34,9 @@ S2 = 1              # High boundary
 def analytical_solution(t, x):
     return -np.exp(-x*gamma*np.exp(r*(T-t)) - (T-t)*0.5*lambd**2)
 
+def analytical_control_solution(t, x):
+    return np.full_like(x, lambd/(gamma*sigma)*np.exp(-r*(T - t)))
+
 
 # Loss relative to the value function
 def loss_value_function(value_function, optimal_control, t1, x1, t3, x3):
@@ -141,6 +144,7 @@ NS_3 = 100
 tplot_t = tf.placeholder(tf.float32, [None,1], name="tplot_t") # We name to recover it later
 xplot_t = tf.placeholder(tf.float32, [None,1], name="xplot_t")
 vplot_t = tf.identity(value_function(tplot_t, xplot_t), name="vplot_t") # Trick for naming the trained model
+cplot_t = tf.identity(optimal_control(tplot_t, xplot_t), name="cplot_t") # Trick for naming the trained model
 
 
 # Training data holders
@@ -186,26 +190,38 @@ times_to_plot = [0*T, 0.33*T, 0.66*T, T]
 tplot = np.linspace(T0, T, N)
 xplot = np.linspace(S0, S2, N)
 
-plt.figure(figsize=(8,7))
+plt.figure(figsize=(15,7))
 i = 1
 for t in times_to_plot:
-    solution_plot = analytical_solution(t, xplot)
+    v_solution_plot = analytical_solution(t, xplot)
+    c_solution_plot = analytical_control_solution(t, xplot)
 
     tt = t*np.ones_like(xplot.reshape(-1,1))
-    nn_plot, = sess.run([vplot_t],
+    nnv_plot, nnc_plot, = sess.run([vplot_t, cplot_t],
                         feed_dict={tplot_t:tt, xplot_t:xplot.reshape(-1,1)})
 
-    plt.subplot(2,2,i)
-    plt.plot(xplot, solution_plot, 'b')
-    plt.plot(xplot, nn_plot, 'r')
+    plt.subplot(2, 4, i)
+    plt.plot(xplot, v_solution_plot, 'b')
+    plt.plot(xplot, nnv_plot, 'r')
 
     plt.ylim(-1.1, -0.2)
     plt.xlabel("S")
     plt.ylabel("V")
     plt.title("t = %.2f"%t, loc="left")
+    
+    plt.subplot(2, 4, i+len(times_to_plot))
+    plt.plot(xplot, c_solution_plot, 'b')
+    plt.plot(xplot, nnv_plot, 'r')
+
+    plt.ylim(-1, 3)
+    plt.xlabel("S")
+    plt.ylabel(r"$\pi$")
+    plt.title("t = %.2f"%t, loc="left")
+    
     i = i+1
 
-plt.subplots_adjust(wspace=0.3, hspace=0.3)
+
+plt.subplots_adjust(wspace=0.4, hspace=0.3)
 plt.show()
 
 
