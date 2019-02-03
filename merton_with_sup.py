@@ -90,7 +90,7 @@ def sampler(N1, N2, N3):
 
 
 # Neural Networks definition
-num_layers = 4
+num_layers = 3
 nodes_per_layer = 50
 
 # Value function net
@@ -130,7 +130,7 @@ optimal_control_optimizer = tf.train.AdamOptimizer(learning_rate=0.001). \
 
 # Training parameters
 steps_per_sample = 10
-sampling_stages = 500
+sampling_stages = 400
 
 # Number of samples
 NS_1 = 1000
@@ -233,6 +233,6 @@ plt.subplot(1,2,2)
 plt.semilogy(sampling_stages_list,LOC_list)
 plt.title("Optimal Control Loss", loc="left")
 plt.xlabel("Stage")
-plt.ylim(1e-8, 1)
+plt.ylim(1e-2, 1)
 
 plt.show()
