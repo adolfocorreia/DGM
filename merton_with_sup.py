@@ -133,7 +133,7 @@ optimal_control_optimizer = tf.train.AdamOptimizer(learning_rate=0.001). \
 
 # Training parameters
 steps_per_sample = 10
-sampling_stages = 400
+sampling_stages = 800
 
 # Number of samples
 NS_1 = 1000
@@ -211,9 +211,9 @@ for t in times_to_plot:
     
     plt.subplot(2, 4, i+len(times_to_plot))
     plt.plot(xplot, c_solution_plot, 'b')
-    plt.plot(xplot, nnv_plot, 'r')
+    plt.plot(xplot, nnc_plot, 'r')
 
-    plt.ylim(-1, 3)
+    plt.ylim(2, 3)
     plt.xlabel("S")
     plt.ylabel(r"$\pi$")
     plt.title("t = %.2f"%t, loc="left")
@@ -246,9 +246,9 @@ plt.xlabel("Stage")
 plt.ylim(1e-8, 1)
 
 plt.subplot(1,2,2)
-plt.semilogy(sampling_stages_list,LOC_list)
+plt.plot(sampling_stages_list,LOC_list)
 plt.title("Optimal Control Loss", loc="left")
 plt.xlabel("Stage")
-plt.ylim(1e-2, 1)
+plt.ylim(0.1, 0.2)
 
 plt.show()
