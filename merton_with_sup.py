@@ -20,12 +20,11 @@ mu = 0.2            # Mean
 lambd = (mu-r)/sigma
 gamma = 1           # Utility decay
 
-# TODO: Rename to T1, T2
-T0 = 0 + 1e-10      # Initial time
-T = 1               # Terminal time
+# Time limits
+T0 = 0.0 + 1e-10    # Initial time
+T  = 1.0            # Terminal time
 
-# TODO: Remove S0
-S0 = 0.0            # Low boundary
+# Space limits
 S1 = 0.0 + 1e-10    # Low boundary
 S2 = 1              # High boundary
 
@@ -36,6 +35,9 @@ def analytical_solution(t, x):
 
 def analytical_control_solution(t, x):
     return np.full_like(x, lambd/(gamma*sigma)*np.exp(-r*(T - t)))
+
+def terminal_condition(x):
+    return -tf.exp(-gamma*x)
 
 
 # Loss relative to the value function
@@ -49,10 +51,10 @@ def loss_value_function(value_function, optimal_control, t1, x1, t3, x3):
     f = u1_t + pi*(mu-r)*u1_x + r*x1*u1_x + 0.5*sigma**2*pi**2*u1_xx
     L1 = tf.reduce_mean(tf.square(f))
 
-    # Loss term 2: Initial condition
+    # Loss term 2: Terminal condition
     u3 = value_function(t3,x3)
-    terminal_condition = -tf.exp(-gamma*x3)
-    L3 = tf.reduce_mean(tf.square(u3 - terminal_condition))
+    tc = terminal_condition(x3)
+    L3 = tf.reduce_mean(tf.square(u3 - tc))
 
     return L1,L3
 
@@ -69,7 +71,6 @@ def loss_optimal_control(value_function, optimal_control, t1, x1):
 
 
 # Sampling
-# TODO: Use tf.random.uniform instead of np.random.uniform
 def sampler(N1, N2, N3):
     # Sampler #1: PDE domain
     t1 = np.random.uniform(low=T0 - 0.5*(T - T0),
@@ -188,7 +189,7 @@ N = 41      # Points on plot grid
 
 times_to_plot = [0*T, 0.33*T, 0.66*T, T]
 tplot = np.linspace(T0, T, N)
-xplot = np.linspace(S0, S2, N)
+xplot = np.linspace(S1, S2, N)
 
 plt.figure(figsize=(15,7))
 i = 1
