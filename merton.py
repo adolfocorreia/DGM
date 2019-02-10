@@ -5,7 +5,6 @@ import numpy as np
 import tensorflow as tf
 
 import DGMnets
-import hessian
 
 
 
@@ -21,15 +20,13 @@ mu = 0.2            # Mean
 lambd = (mu-r)/sigma
 gamma = 1           # Utility decay
 
-# TODO: Rename to T1, T2
-T0 = 0 + 1e-10      # Initial time
-T = 1               # Terminal time
+# Time limits
+T0 = 0.0 + 1e-10    # Initial time
+T  = 1.0            # Terminal time
 
-# TODO: Remove S0
-S0 = 0.0            # Low boundary
+# Space limits
 S1 = 0.0 + 1e-10    # Low boundary
 S2 = 1              # High boundary
-
 
 
 # Merton's analytical known solution
@@ -68,18 +65,7 @@ def loss(model, t1, x1, t2, x2, t3, x3):
     return (L1, L2, L3)
 
 
-def functional(model, t, x):
-    V = model(t, x)
-    V_t = tf.gradients(V, t)[0]
-    V_x = tf.gradients(V, x)[0]
-    V_xx = hessian.fin_diff_hessian(model, t, x, 1e-4)[:,:,0]
-    f = -0.5*lambd**2*V_x**2 + (V_t + r*x*V_x)*V_xx
-    return f
-
-
-
 # Sampling
-# TODO: Use tf.random.uniform instead of np.random.uniform
 def sampler(N1, N2, N3):
     # Sampler #1: PDE domain
     t1 = np.random.uniform(low=T0 - 0.5*(T - T0),
@@ -102,7 +88,6 @@ def sampler(N1, N2, N3):
     return (t1, s1, t2, s2, t3, s3)
 
 
-
 # Neural Network definition
 num_layers = 3
 nodes_per_layer = 50
@@ -118,8 +103,6 @@ x3_t = tf.placeholder(tf.float32, [None,1])
 L1_t, L2_t, L3_t = loss(model, t1_t, x1_t, t2_t, x2_t, t3_t, x3_t)
 loss_t = L1_t + L2_t + L3_t
 
-functional_t = functional(model, t1_t, x1_t)
-
 
 # Optimizer parameters
 global_step = tf.Variable(0, trainable=False)
@@ -131,13 +114,12 @@ optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss_t)
 
 # Training parameters
 steps_per_sample = 10
-sampling_stages = 400
+sampling_stages = 800
 
 # Number of samples
 NS_1 = 1000
 NS_2 = 0
 NS_3 = 100
-
 
 # Plot tensors
 tplot_t = tf.placeholder(tf.float32, [None,1], name="tplot_t") # We name to recover it later
@@ -185,7 +167,7 @@ N = 41      # Points on plot grid
 
 times_to_plot = [0*T, 0.33*T, 0.66*T, T]
 tplot = np.linspace(T0, T, N)
-xplot = np.linspace(S0, S2, N)
+xplot = np.linspace(S1, S2, N)
 
 plt.figure(figsize=(8,7))
 i = 1
@@ -212,11 +194,11 @@ plt.show()
 
 # Save the trained model
 saver = tf.train.Saver()
-saver.save(sess, './SavedNets/merton_1d_hessian')
+saver.save(sess, './SavedNets/merton_1d')
 
 
 # Save the time tracking
-np.save('./TimeTracks/merton_1d_hessians',
+np.save('./TimeTracks/merton_1d',
         (sampling_stages_list, elapsed_time_list, loss_list, L1_list, L3_list))
 
 
